@@ -14,7 +14,7 @@
 		<div class="jumbotron">
 			<div class="container">
 				<h1>Books</h1>
-				<p>This page contains all informations about books</p>
+				<p>${hintMessage}</p>
 			</div>
 		</div>
 	</section>
@@ -29,11 +29,18 @@
 							<p>${book.title}</p>
 							<p>${book.authors}</p>
 							<p>Status: ${book.status}</p>
+						
 							<p>
 								<a
 									href=" <spring:url value="/books/book?id=${book.id}" /> "
 									class="btn btn-primary"> <span
 									class="glyphicon-info-sign glyphicon" /></span> Details
+								</a>
+								
+								<a
+									href=" <spring:url value="/books/delete?id=${book.id}" /> "
+									class="btn btn-danger"> <span
+									class="glyphicon-trash glyphicon" /></span> Delete
 								</a>
 							</p>
 

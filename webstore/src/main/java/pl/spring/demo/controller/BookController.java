@@ -1,117 +1,100 @@
 package pl.spring.demo.controller;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.ModelAndView;
 import pl.spring.demo.constants.ModelConstants;
 import pl.spring.demo.constants.ViewNames;
+import pl.spring.demo.searchcriteria.SearchCriteria;
 import pl.spring.demo.service.BookService;
 import pl.spring.demo.to.BookTo;
 
-
-/**
- * Book controller
- * 
- * @author mmotowid
- */
-
-/*
- * @author wpajzder
- */
 @Controller
 @RequestMapping("/books")
 public class BookController {
 
-	
 	@Autowired
 	private BookService bookService;
-	
-	@ModelAttribute("newBook")
-	public BookTo construct(){
-		return new BookTo();
-	}
-	
-	
-	/*
-	 * Default Method displays all books
-	 */
+
 	@RequestMapping
-	public String list(Model model) {
-		model.addAttribute(ModelConstants.BOOK_LIST, bookService.findAllBooks());
-		return ViewNames.BOOKS;
+	public String list() {
+		return "redirect:/books/all";
 	}
 
-	/**
-	 * Method collects info about all books
-	 */
-	@RequestMapping("/all")
-	public ModelAndView allBooks() {
-		ModelAndView modelAndView = new ModelAndView(ViewNames.BOOKS);
-		modelAndView.addObject(ModelConstants.BOOK_LIST, bookService.findAllBooks());
-		return modelAndView;
-	}
-	
-	/*
-	 * Method collects detailed info about specified book
-	 */
-	@RequestMapping("/book")
-	public ModelAndView bookDetails(@RequestParam ("id") Long id){
-		ModelAndView modelAndView = new ModelAndView(ViewNames.BOOK);
-		modelAndView.addObject(ModelConstants.BOOK, bookService.findBookByID(id));
-		return modelAndView;
+	@RequestMapping(value = "/book")
+	public String bookDetails(@RequestParam("id") Long id, Model model) {
+		model.addAttribute(ModelConstants.BOOK_SINGLE, bookService.findBookByID(id));
+		return ViewNames.ONE_BOOK;
 	}
 
-	/*
-	 * Method to initialize the Add Book screen.
-	 */
+	@RequestMapping(value = "/all", method = RequestMethod.GET)
+	public String allBooks(Model model) {
+		model.addAttribute(ModelConstants.HINT_MESSAGE, "Information about all books");
+		model.addAttribute(ModelConstants.BOOKS_LIST, bookService.findAllBooks());
+		return ViewNames.ALL_BOOKS;
+	}
+
 	@RequestMapping(value = "/add", method = RequestMethod.GET)
-	public String addBook(Model model){
-		model.addAttribute(ModelConstants.CREATOR_HINT, "PLEASE PROVIDE INPUT");
+	public String addBook(Model model) {
+		model.addAttribute(ModelConstants.HINT_MESSAGE, "Please provide input");
 		model.addAttribute(ModelConstants.NEW_BOOK, new BookTo());
 		return ViewNames.ADD_BOOK;
 	}
-	
-	/*
-	 * Method to continue adding books.
-	 */
+
 	@RequestMapping(value = "/add", method = RequestMethod.POST)
-	public ModelAndView addBook(@ModelAttribute ("newBook") BookTo newBook, ModelMap model){
-		ModelAndView modelAndView = new ModelAndView(ViewNames.ADD_BOOK);
-		if(bookInputComplete(newBook)){
+	public String addBook(@ModelAttribute("newBook") BookTo newBook, Model model) {
+
+		if (bookInputComplete(newBook)) {
 			bookService.saveBook(newBook);
-			System.out.println("book saved !");
-			model.addAttribute(ModelConstants.CREATOR_HINT, "BOOK SAVED SUCCESSFULLY");
-			modelAndView.addObject(ModelConstants.NEW_BOOK, new BookTo());
-			return modelAndView;
-		}else{
-			model.addAttribute(ModelConstants.CREATOR_HINT, "INPUT NOT COMPLETE !!!");
-			return modelAndView;
+			model.addAttribute(ModelConstants.HINT_MESSAGE, "Book saved successfully");
+			model.addAttribute(ModelConstants.NEW_BOOK, new BookTo());
+			return ViewNames.ADD_BOOK;
+
+		} else {
+			model.addAttribute(ModelConstants.HINT_MESSAGE, "Input NOT complete !!!");
+			model.addAttribute(ModelConstants.NEW_BOOK, newBook);
+			return ViewNames.ADD_BOOK;
 		}
 	}
 
-	
-	
-	// TODO: here implement methods which displays book info based on query
-	// arguments
-
-
-	/**
-	 * Binder initialization
-	 */
-	@InitBinder
-	public void initialiseBinder(WebDataBinder binder) {
-		binder.setAllowedFields("id", "title", "authors", "status");
+	@RequestMapping(value = "/find", method = RequestMethod.GET)
+	public String findBook(Model model) {
+		model.addAttribute(ModelConstants.HINT_MESSAGE, "Please provide input");
+		model.addAttribute(ModelConstants.NEW_CRIT, new SearchCriteria());
+		return ViewNames.FIND_BOOK;
 	}
 
-	private boolean bookInputComplete(BookTo newBook){
-		return !(newBook.getAuthors().isEmpty() || newBook.getTitle().isEmpty() || newBook.getStatus() == null);
+	@RequestMapping(value = "/find", method = RequestMethod.POST)
+	public String findBook(@ModelAttribute("newCriteria") SearchCriteria criteria, Model model) {
+		String[] critArr = {criteria.getAuthors(), criteria.getTitle()};
+		List<BookTo> booksFound = bookService.findBooksByCriteria(critArr);
+		String hint = "Books for author: " + critArr[0] + " title: " + critArr[1];
+		model.addAttribute(ModelConstants.HINT_MESSAGE, hint);
+		model.addAttribute(ModelConstants.BOOKS_LIST, booksFound);
+		return ViewNames.ALL_BOOKS;
 	}
-	
+
+	@RequestMapping(value = "/delete", method = RequestMethod.GET)
+	public String deleteBook(@RequestParam("id") Long id, Model model) {
+		bookService.deleteBook(id);
+		model.addAttribute(ModelConstants.HINT_MESSAGE, "Books of id: " + id + " deleted !");
+		model.addAttribute(ModelConstants.BOOKS_LIST, bookService.findAllBooks());
+		return ViewNames.ALL_BOOKS;
+	}
+
+	@ExceptionHandler(Exception.class)
+	public String handleException(Exception ex) {
+		return ViewNames.ERROR_500;
+	}
+
+	private boolean bookInputComplete(BookTo newBook) {
+		return !(newBook.getAuthors().isEmpty() || 
+				newBook.getTitle().isEmpty() || newBook.getStatus() == null);
+	}
+
 }

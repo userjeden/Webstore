@@ -11,6 +11,7 @@ import pl.spring.demo.service.BookService;
 import pl.spring.demo.to.BookTo;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -38,6 +39,17 @@ public class BookServiceImpl implements BookService {
     public BookTo findBookByID(Long id) {
     	List<BookTo> allBooks = findAllBooks();
     	return allBooks.stream().filter(b -> b.getId().equals(id)).findFirst().get();
+    }
+    
+    @Override
+    public List<BookTo> findBooksByCriteria(String[] criteriaArray) {
+    	String authorCriteria = criteriaArray[0];
+    	String titleCriteria = criteriaArray[1];
+    	List<BookTo> filtered = findAllBooks().stream()
+    			.filter(t ->t.getAuthors().startsWith(authorCriteria))
+    			.filter(t ->t.getTitle().startsWith(titleCriteria))
+    			.collect(Collectors.toList());
+    	return filtered;
     }
 
     @Override

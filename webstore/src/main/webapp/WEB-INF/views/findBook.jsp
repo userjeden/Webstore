@@ -11,22 +11,24 @@
 <title>Add Book</title>
 </head>
 <body>
+
 	<section>
 		<div class="jumbotron">
 			<div class="container">
 				<h1>Book</h1>
-				<p>Add new book</p>
+				<p>Search for book</p>
 			</div>
-			<a href="<c:url value="/j_spring_security_logout" />"
-				class="btn btn-danger btn-mini pull-right">logout</a>
 		</div>
 	</section>
+	
 	<section class="container">
-		<form:form modelAttribute="newBook" class="form-horizontal">
+		<form:form modelAttribute="newCriteria" class="form-horizontal">
 			<fieldset>
+			
 				<legend>${hintMessage}</legend>
 
 				<!-- Sample template for some fields in Book Entity -->
+				
 				<div class="form-group">
 					<label class="control-label col-lg-2" for="name">Title</label>
 					<div class="col-lg-10">
@@ -34,6 +36,7 @@
 							class="form:input-large" />
 					</div>
 				</div>
+				
 				<div class="form-group">
 					<label class="control-label col-lg-2" for="name">Author</label>
 					<div class="col-lg-10">
@@ -41,24 +44,16 @@
 							class="form:input-large" />
 					</div>
 				</div>
-				<div class="form-group">
-					<label class="control-label col-lg-2" for="status">status</label>
-					<div class="col-lg-10">
-						<form:radiobutton path="status" value="FREE" />
-						Free
-						<form:radiobutton path="status" value="LOAN" />
-						Loan
-						<form:radiobutton path="status" value="MISSING" />
-						Missing
-					</div>
-				</div>
+				
 			</fieldset>
+			
 			<div class="form-group">
 				<div class="col-lg-offset-2 col-lg-10">
 					<input type="submit" id="btnAdd" class="btn btn-primary"
-						value="Create" />
+						value="Search" />
 				</div>
 			</div>
+			
 		</form:form>
 	</section>
 </body>

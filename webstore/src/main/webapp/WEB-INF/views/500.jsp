@@ -19,24 +19,10 @@
 		
 			<div class="container">
 				<h1>Error</h1>
-				<p>no access granted for user: ${userName}</p>
-				<p>please use different account</p>
+				<p>operation not allowed</p>
 			</div>
 		</div>
 	</section>
-	
-	<div class="container">
-		<div class="row">
-		<div class="panel-body text-center">
-						
-			<a
-				href="<spring:url value="/login"/>" class="btn btn-primary btn-lg"> 
-				<span class="glyphicon-link glyphicon"/></span> Proceed to login page
-			</a>
-			
-		</div>
-		</div>
-	</div>
 	
 	
 </body>
